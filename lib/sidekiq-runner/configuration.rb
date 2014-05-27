@@ -2,6 +2,17 @@ require 'yaml'
 
 module SidekiqRunner
   class Configuration
+    def self.default
+      @default ||= Configuration.new
+    end
+
+    def self.get
+      config = default.dup
+      config.send :merge_config_file!
+      config.send :sane?
+      config
+    end
+
     attr_accessor :configfile
     attr_accessor :bundle_env
     attr_accessor :daemonize
@@ -32,6 +43,18 @@ module SidekiqRunner
       @queues << [name, weight]
     end
 
+    ['start', 'stop'].each do |action|
+      ['success', 'error'].each do |state|
+        attr_reader "#{action}_#{state}_cb".to_sym
+
+        define_method("on_#{action}_#{state}") do |&block|
+          instance_variable_set("@#{action}_#{state}_cb".to_sym, block)
+        end
+      end
+    end
+
+  private
+
     def merge_config_file!
       if File.exists?(configfile)
         yml = YAML.load_file(config_file)
@@ -47,17 +70,6 @@ module SidekiqRunner
     def sane?
       raise 'No requirefile given and not in Rails env.' if !defined?(Rails) && !requirefile
       raise 'No queues given.' if queues.empty?
-    end
-
-    def self.default
-      @default ||= Configuration.new
-    end
-
-    def self.get
-      config = default.dup
-      config.merge_config_file!
-      config.sane?
-      config
     end
   end
 end

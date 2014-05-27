@@ -1,6 +1,7 @@
 require 'sidekiq-runner/configuration'
 require 'sidekiq-runner/version'
 
+require 'open3'
 require 'fileutils'
 
 module SidekiqRunner
@@ -33,7 +34,7 @@ module SidekiqRunner
 
     FileUtils.mkdir_p(File.dirname(config.pidfile))
     FileUtils.mkdir_p(File.dirname(config.logfile))
-    run(cmd, config)
+    run(:start, cmd, config)
   end
 
   def self.stop
@@ -47,16 +48,25 @@ module SidekiqRunner
     cmd << config.pidfile
     cmd << '60'
 
-    run(cmd, config)
+    run(:stop, cmd, config)
   end
 
 private
 
-  def self.run(cmd, config)
+  def self.run(action, cmd, config)
     chdir = config.chdir || Dir.pwd
-    Dir.chdir(chdir) do
-      puts ">> #{cmd.join(' ')}" if config.verbose
-      Kernel.exec cmd.join(' ')
+    sout, serr, st = Open3.capture3(cmd.join(' '), chdir: chdir )
+
+    if st.success?
+      cb = "#{action}_success_cb"
+    else
+      cb = "#{action}_error_cb"
+      puts "Failed to execute: #{cmd}"
+      puts "STDOUT: #{sout}"
+      puts "STDERR: #{serr}"
     end
+
+    cb = config.send(cb.to_sym)
+    cb.call if cb
   end
 end
