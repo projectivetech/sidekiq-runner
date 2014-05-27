@@ -40,18 +40,14 @@ module SidekiqRunner
 
       # It might take a while for sidekiq to start.
       sleep 1
-
-      # Verify pidfile and process.
-      raise 'PID file does not exists!' unless File.exists?(config.pidfile)
-      pid = File.read(config.pidfile).strip.to_i
-      Process.kill 0, pid rescue raise "No process has pid #{pid}!"
+      abort('Failed to verify that Sidekiq is now running.') unless running?
     end
   end
 
   def self.stop
     config = Configuration.get
 
-    abort('Sidekiq is not running.') unless File.exists?(config.pidfile)
+    abort('Sidekiq is not running.') unless running?
 
     cmd = []
     cmd << (config.bundle_env ? 'bundle exec sidekiqctl' : 'sidekiqctl')
@@ -60,6 +56,16 @@ module SidekiqRunner
     cmd << '60'
 
     run(:stop, cmd, config)
+  end
+
+  def self.running?
+    config = Configuration.get
+
+    return false unless File.exists?(config.pidfile)
+    Process.getpgid(File.read(config.pidfile).strip.to_i)
+    true
+  rescue
+    false
   end
 
 private
