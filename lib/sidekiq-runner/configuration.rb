@@ -18,6 +18,7 @@ module SidekiqRunner
     attr_accessor :daemonize
     attr_accessor :chdir
     attr_accessor :requirefile
+    attr_accessor :verify_ps
 
     CONFIG_FILE_ATTRIBUTES = [ :pidfile, :logfile, :concurrency, :verbose ]
     CONFIG_FILE_ATTRIBUTES.each { |att| attr_accessor att }
@@ -30,6 +31,7 @@ module SidekiqRunner
       @daemonize   = true
       @chdir       = nil
       @requirefile = nil
+      @verify_ps   = false
 
       @pidfile     = File.join(Dir.pwd, 'tmp', 'pids', 'sidekiq.pid')
       @logfile     = File.join(Dir.pwd, 'log', 'sidekiq.log')

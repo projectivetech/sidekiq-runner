@@ -34,7 +34,18 @@ module SidekiqRunner
 
     FileUtils.mkdir_p(File.dirname(config.pidfile))
     FileUtils.mkdir_p(File.dirname(config.logfile))
-    run(:start, cmd, config)
+
+    run(:start, cmd, config) do
+      break unless config.verify_ps
+
+      # It might take a while for sidekiq to start.
+      sleep 1
+
+      # Verify pidfile and process.
+      raise 'PID file does not exists!' unless File.exists?(config.pidfile)
+      pid = File.read(config.pidfile).strip.to_i
+      Process.kill 0, pid rescue raise "No process has pid #{pid}!"
+    end
   end
 
   def self.stop
@@ -54,18 +65,21 @@ module SidekiqRunner
 private
 
   def self.run(action, cmd, config)
+    cmd   = cmd.join(' ')
     chdir = config.chdir || Dir.pwd
-    sout, serr, st = Open3.capture3(cmd.join(' '), chdir: chdir )
 
-    if st.success?
-      cb = "#{action}_success_cb"
-    else
-      cb = "#{action}_error_cb"
+    sout, serr, st = Open3.capture3(cmd, chdir: chdir )
+
+    if !st.success?
       puts "Failed to execute: #{cmd}"
       puts "STDOUT: #{sout}"
       puts "STDERR: #{serr}"
     end
 
+    # Have the result verified externally.
+    yield if block_given?
+
+    cb = st.success? ? "#{action}_success_cb" : "#{action}_error_cb"
     cb = config.send(cb.to_sym)
     cb.call if cb
   end
