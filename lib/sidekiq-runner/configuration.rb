@@ -59,7 +59,7 @@ module SidekiqRunner
 
     def merge_config_file!
       if File.exists?(configfile)
-        yml = YAML.load_file(config_file)
+        yml = YAML.load_file(configfile)
         CONFIG_FILE_ATTRIBUTES.each do |k|
           v = yml[k] || yml[k.to_sym]
           self.send("#{k}=", v) if v
