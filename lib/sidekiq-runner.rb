@@ -68,6 +68,10 @@ module SidekiqRunner
     false
   end
 
+  def self.settings
+    Configuration.get.to_hash
+  end
+
 private
 
   def self.run(action, cmd, config)

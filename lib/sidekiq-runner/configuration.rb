@@ -13,12 +13,8 @@ module SidekiqRunner
       config
     end
 
-    attr_accessor :configfile
-    attr_accessor :bundle_env
-    attr_accessor :daemonize
-    attr_accessor :chdir
-    attr_accessor :requirefile
-    attr_accessor :verify_ps
+    RUNNER_ATTRIBUTES = [ :configfile, :bundle_env, :daemonize, :chdir, :requirefile, :verify_ps ]
+    RUNNER_ATTRIBUTES.each { |att| attr_accessor att }
 
     CONFIG_FILE_ATTRIBUTES = [ :pidfile, :logfile, :concurrency, :verbose ]
     CONFIG_FILE_ATTRIBUTES.each { |att| attr_accessor att }
@@ -53,6 +49,10 @@ module SidekiqRunner
           instance_variable_set("@#{action}_#{state}_cb".to_sym, block)
         end
       end
+    end
+
+    def to_hash
+      Hash[CONFIG_FILE_ATTRIBUTES.map { |att| [att, self.send(att) ] }]
     end
 
   private
