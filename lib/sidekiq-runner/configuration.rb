@@ -52,7 +52,7 @@ module SidekiqRunner
     end
 
     def to_hash
-      Hash[CONFIG_FILE_ATTRIBUTES.map { |att| [att, self.send(att) ] }]
+      Hash[CONFIG_FILE_ATTRIBUTES.map { |att| [att, self.send(att)] }]
     end
 
   private
@@ -61,7 +61,7 @@ module SidekiqRunner
       if File.exists?(configfile)
         yml = YAML.load_file(configfile)
         CONFIG_FILE_ATTRIBUTES.each do |k|
-          v = yml[k] || yml[k.to_sym]
+          v = yml[k] || yml[k.to_s]
           self.send("#{k}=", v) if v
         end
       end
