@@ -56,6 +56,9 @@ module SidekiqRunner
     cmd << '60'
 
     run(:stop, cmd, config)
+
+    # Make sure the pidfile is deleted as sidekiqctl does not delete stale pidfiles.
+    FileUtils.rm(config.pidfile) if File.exists?(config.pidfile)
   end
 
   def self.running?
