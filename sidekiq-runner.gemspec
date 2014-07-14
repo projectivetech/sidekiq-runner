@@ -16,4 +16,5 @@ Gem::Specification.new do |s|
   s.files         = Dir.glob('lib/**/*.rb')
 
   s.add_dependency 'rake', '~> 10.3'
+  s.add_dependency 'god', '~> 0.13'
 end

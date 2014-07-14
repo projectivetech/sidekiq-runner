@@ -1,4 +1,5 @@
-require 'sidekiq-runner/configuration'
+require 'sidekiq-runner/sidekiq_configuration'
+require 'sidekiq-runner/god_configuration'
 require 'sidekiq-runner/version'
 
 require 'open3'
@@ -6,94 +7,88 @@ require 'fileutils'
 
 module SidekiqRunner
   def self.configure
-    yield Configuration::default if block_given?
+    yield SidekiqConfiguration.default if block_given?
   end
 
   def self.start
-    config = Configuration.get
+    sidekiq_config, god_config = get_all_settings
 
-    abort("Sidekiq is already running (pid: #{File.read(config.pidfile).strip}).") if File.exists?(config.pidfile)
+    FileUtils.mkdir_p(File.dirname(sidekiq_config.pidfile))
+    FileUtils.mkdir_p(File.dirname(sidekiq_config.logfile))
 
-    cmd = []
-    cmd << (config.bundle_env ? 'bundle exec sidekiq' : 'sidekiq')
-    cmd << '-d' if config.daemonize
-    cmd << "-c #{config.concurrency}"
-    cmd << "-e #{Rails.env}" if defined?(Rails)
-    cmd << '-v' if config.verbose
-    cmd << "-L #{config.logfile}"
-    cmd << "-P #{config.pidfile}"
-    config.queues.each do |q, w|
-      cmd << "-q #{q},#{w}"
-    end
+    abort 'God is running. I found an instance of a running god process. Please stop it manually and try again.' if god_alive?(god_config)
 
-    if config.requirefile
-      cmd << "-r #{config.requirefile}"
-    else # Rails is defined, see Configuration.sane?.
-      cmd << "-e #{Rails.env}"
-    end
-
-    FileUtils.mkdir_p(File.dirname(config.pidfile))
-    FileUtils.mkdir_p(File.dirname(config.logfile))
-
-    run(:start, cmd, config) do
-      break unless config.verify_ps
-
-      # It might take a while for sidekiq to start.
-      sleep 1
-      abort('Failed to verify that Sidekiq is now running.') unless running?
+    run(:start, sidekiq_config) do
+      puts 'Starting god.'
+      God::CLI::Run.new(god_config.options)
     end
   end
 
   def self.stop
-    config = Configuration.get
+    sidekiq_config, god_config = get_all_settings
 
-    abort('Sidekiq is not running.') unless running?
+    run(:stop, sidekiq_config) do
+      God::EventHandler.load
 
-    cmd = []
-    cmd << (config.bundle_env ? 'bundle exec sidekiqctl' : 'sidekiqctl')
-    cmd << 'stop'
-    cmd << config.pidfile
-    cmd << '60'
+      if god_alive?(god_config)
+        puts "Stopping process #{god_config.process_name}."
+        # Stop the process
+        God::CLI::Command.new('stop', god_config.options, ['', god_config.process_name])
 
-    run(:stop, cmd, config)
-
-    # Make sure the pidfile is deleted as sidekiqctl does not delete stale pidfiles.
-    FileUtils.rm(config.pidfile) if File.exists?(config.pidfile)
-  end
-
-  def self.running?
-    config = Configuration.get
-
-    return false unless File.exists?(config.pidfile)
-    Process.getpgid(File.read(config.pidfile).strip.to_i)
-    true
-  rescue
-    false
+        puts 'Terminating god.'
+        God::CLI::Command.new('terminate', god_config.options, [])
+      else
+        puts 'God is not running, so no need to stop it.'
+      end
+    end
   end
 
   def self.settings
-    Configuration.get.to_hash
+    SidekiqConfiguration.get.to_hash
   end
 
-private
+  private
 
-  def self.run(action, cmd, config)
-    cmd   = cmd.join(' ')
-    chdir = config.chdir || Dir.pwd
+  def self.get_all_settings
+    [SidekiqConfiguration.get, GodConfiguration.get]
+  end
 
-    sout, serr, st = Open3.capture3(cmd, chdir: chdir )
+  def self.god_alive?(god_config)
+    puts 'Checking whether god is alive...'
 
-    if !st.success?
-      puts "Failed to execute: #{cmd}"
-      puts "STDOUT: #{sout}"
-      puts "STDERR: #{serr}"
+    require 'drb'
+    require 'god/socket'
+    DRb.start_service('druby://127.0.0.1:0')
+    server = DRbObject.new(nil, God::Socket.socket(god_config.port))
+
+    # ping server to ensure that it is responsive
+    begin
+      server.ping
+    rescue DRb::DRbConnError
+      return false
     end
-
-    # Have the result verified externally.
-    yield if block_given?
-
-    cb = st.success? ? "#{action}_success_cb" : "#{action}_error_cb"
-    cb = config.send(cb.to_sym)
-    cb.call if cb
+    true
   end
+
+  def self.run(action, sidekiq_config)
+    begin
+      # Use this flag to actually load all of the god infrastructure
+      $load_god = true
+      require 'god'
+      require 'god/cli/run'
+
+      # Peform the action
+      yield if block_given?
+      cb = nil
+    rescue SystemExit => e
+      cb = e.success? ? "#{action}_success_cb" : "#{action}_error_cb"
+    ensure
+      if [:start, :stop].include? action
+        cb = "#{action}_success_cb" unless cb
+        cb = sidekiq_config.send(cb.to_sym)
+        cb.call if cb
+      end
+    end
+  end
+
 end
