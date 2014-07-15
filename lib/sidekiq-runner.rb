@@ -36,11 +36,11 @@ module SidekiqRunner
     FileUtils.mkdir_p(File.dirname(config.logfile))
 
     run(:start, cmd, config) do
-      break unless config.verify_ps
-
-      # It might take a while for sidekiq to start.
-      sleep 1
-      abort('Failed to verify that Sidekiq is now running.') unless running?
+      if config.verify_ps
+        # It might take a while for sidekiq to start.
+        sleep 1
+        abort('Failed to verify that Sidekiq is now running.') unless running?
+      end
     end
   end
 
