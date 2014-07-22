@@ -1,28 +1,28 @@
 module SidekiqCommandBuilder
 
-  def self.build_start_command(config)
+  def self.build_start_command(sidekiq_config, skiq)
     cmd = []
-    cmd << (config.bundle_env ? 'bundle exec sidekiq' : 'sidekiq')
-    cmd << '-d' if config.daemonize
-    cmd << "-c #{config.concurrency}"
+    cmd << (skiq.bundle_env ? 'bundle exec sidekiq' : 'sidekiq')
+    cmd << '-d' if sidekiq_config.daemonize
+    cmd << "-c #{skiq.concurrency}"
     cmd << "-e #{Rails.env}" if defined?(Rails)
-    cmd << '-v' if config.verbose
-    cmd << "-L #{config.logfile}"
-    cmd << "-P #{config.pidfile}"
-    cmd << "-r #{config.requirefile}" if config.requirefile
+    cmd << '-v' if skiq.verbose
+    cmd << "-L #{skiq.logfile}"
+    cmd << "-P #{skiq.pidfile}"
+    cmd << "-r #{skiq.requirefile}" if skiq.requirefile
 
-    config.queues.each do |q, w|
-      cmd << "-q #{q},#{w}"
+    skiq.queues.each do |q, w|
+      cmd << "-q #{q},#{w.to_s}"
     end
 
     cmd.join(' ')
   end
 
-  def self.build_stop_command(config, timeout)
+  def self.build_stop_command(skiq, timeout)
     cmd = []
-    cmd << (config.bundle_env ? 'bundle exec sidekiqctl' : 'sidekiqctl')
+    cmd << (skiq.bundle_env ? 'bundle exec sidekiqctl' : 'sidekiqctl')
     cmd << 'stop'
-    cmd << config.pidfile
+    cmd << skiq.pidfile
     cmd << timeout
 
     cmd.join(' ')

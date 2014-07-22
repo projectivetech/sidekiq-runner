@@ -1,9 +1,7 @@
 require 'sidekiq-runner/sidekiq_configuration'
 require 'sidekiq-runner/god_configuration'
+require 'sidekiq-runner/sidekiq_instance'
 require 'sidekiq-runner/version'
-
-require 'open3'
-require 'fileutils'
 
 module SidekiqRunner
   def self.configure
@@ -13,8 +11,7 @@ module SidekiqRunner
   def self.start
     sidekiq_config, god_config = get_all_settings
 
-    FileUtils.mkdir_p(File.dirname(sidekiq_config.pidfile))
-    FileUtils.mkdir_p(File.dirname(sidekiq_config.logfile))
+    fail 'No sidekiq instances defined. There is nothing to run.' if sidekiq_config.empty?
 
     abort 'God is running. I found an instance of a running god process. Please stop it manually and try again.' if god_alive?(god_config)
 
@@ -32,8 +29,11 @@ module SidekiqRunner
 
       if god_alive?(god_config)
         puts "Stopping process #{god_config.process_name}."
-        # Stop the process
-        God::CLI::Command.new('stop', god_config.options, ['', god_config.process_name])
+
+        # Stop all the processes
+        sidekiq_config.each do |skiq|
+          God::CLI::Command.new('stop', god_config.options, ['', skiq.name])
+        end
 
         puts 'Terminating god.'
         God::CLI::Command.new('terminate', god_config.options, [])
