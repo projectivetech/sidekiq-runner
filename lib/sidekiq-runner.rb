@@ -8,6 +8,10 @@ module SidekiqRunner
     yield SidekiqConfiguration.default if block_given?
   end
 
+  def self.configure_god
+    yield GodConfiguration.default if block_given?
+  end
+
   def self.start
     sidekiq_config, god_config = get_all_settings
 
