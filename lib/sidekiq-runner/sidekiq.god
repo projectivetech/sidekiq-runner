@@ -8,9 +8,9 @@ god_config = SidekiqRunner::GodConfiguration.get
 
 God.terminate_timeout = god_config.stop_timeout + 10
 
-sidekiq_config.each do |skiq|
+sidekiq_config.each do |name, skiq|
   God.watch do |w|
-    w.name = skiq.name
+    w.name = name
 
     # Set start command
     w.start = SidekiqCommandBuilder::build_start_command(sidekiq_config, skiq)

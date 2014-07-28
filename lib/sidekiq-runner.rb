@@ -31,8 +31,8 @@ module SidekiqRunner
         puts "Stopping process #{god_config.process_name}."
 
         # Stop all the processes
-        sidekiq_config.each do |skiq|
-          God::CLI::Command.new('stop', god_config.options, ['', skiq.name])
+        sidekiq_config.each_key do |name|
+          God::CLI::Command.new('stop', god_config.options, ['', name])
         end
 
         puts 'Terminating god.'

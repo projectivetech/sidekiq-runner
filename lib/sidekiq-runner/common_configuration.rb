@@ -31,7 +31,7 @@ module SidekiqRunner
       if File.exist?(config_file)
         yml = YAML.load_file(config_file)
         CONFIG_FILE_ATTRIBUTES.each do |k|
-          v = nil || yml[k] || yml[k.to_s]
+          v = yml[k] || yml[k.to_s]
           send("#{k}=", v) unless v.nil?
         end
       end
