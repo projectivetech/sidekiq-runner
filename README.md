@@ -81,13 +81,6 @@ SidekiqRunner.configure_god do |god_config|
   god_config.interval = 30
 end
 ```
-If you would like to fine-tune God configuration for sidekiq processes even more, you can provide your own `*.god` file and specify the path to it in the config:
-```ruby
-SidekiqRunner.configure_god do |god_config|
-  god_config.god_process_config_file = '/path/to/the/god-processes.god'
-end
-```
-You can find more information about God configuration at [God's homepage](http://godrb.com)
 
 1. SidekiqRunner options:
   * `:config_file, :daemonize`
@@ -96,7 +89,7 @@ You can find more information about God configuration at [God's homepage](http:/
   * `:bundle_env, :chdir, :requirefile, :concurrency, :verbose, :pidfile, :logfile`
   * ALL overwritable by the yml file
 3. God options:
-  * `:config_file, :daemonize, :port, :syslog, :events, :god_process_config_file, :options`
+  * `:config_file, :daemonize, :port, :syslog, :events, :options`
   * overwritable by the yml file: `:process_name, :interval, :stop_timeout, :log_file`
 
 ## License
