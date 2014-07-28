@@ -21,10 +21,8 @@ module SidekiqRunner
       @default ||= SidekiqConfiguration.new
     end
 
-    def each
-      @sidekiqs.each do |skiq|
-        yield skiq if block_given?
-      end
+    def each(&block)
+      @sidekiqs.each(&block)
     end
 
     def empty?
