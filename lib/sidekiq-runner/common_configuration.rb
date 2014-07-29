@@ -32,7 +32,7 @@ module SidekiqRunner
         yml = YAML.load_file(config_file)
         CONFIG_FILE_ATTRIBUTES.each do |k|
           v = yml[k] || yml[k.to_s]
-          send("#{k}=", v) if v
+          send("#{k}=", v) unless v.nil?
         end
       end
 

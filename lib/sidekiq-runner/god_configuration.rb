@@ -6,7 +6,7 @@ module SidekiqRunner
       @default ||= GodConfiguration.new
     end
 
-    RUNNER_ATTRIBUTES = [:config_file, :daemonize, :port, :syslog, :events, :god_process_config_file, :options]
+    RUNNER_ATTRIBUTES = [:config_file, :daemonize, :port, :syslog, :events, :options]
     RUNNER_ATTRIBUTES.each { |att| attr_accessor att }
 
     CONFIG_FILE_ATTRIBUTES = [:process_name, :interval, :stop_timeout, :log_file]
@@ -25,13 +25,12 @@ module SidekiqRunner
       @port = 17165
       @syslog = true
       @events = true
-      @god_process_config_file = File.expand_path("../#{@process_name}.god", __FILE__)
       @options = {
         daemonize: @daemonize,
         port: @port,
         syslog: @syslog,
         events: @events,
-        config: @god_process_config_file,
+        config: File.expand_path("../#{@process_name}.god", __FILE__),
         log: @log_file
       }
     end
