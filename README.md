@@ -86,14 +86,14 @@ end
 ```
 
 1. SidekiqRunner options:
-  * `:config_file, :daemonize`
-  * NONE overwritable by the yml file
+  * `:config_file`
+  * Not overwritable by the yml file
 2. Sidekiq instance options:
   * `:bundle_env, :chdir, :requirefile, :concurrency, :verbose, :pidfile, :logfile`
-  * ALL overwritable by the yml file
+  * All overwritable by the yml file
 3. God options:
   * `:config_file, :daemonize, :port, :syslog, :events, :options`
-  * overwritable by the yml file: `:process_name, :interval, :stop_timeout, :log_file`
+  * Overwritable by the yml file: `:process_name, :interval, :stop_timeout, :log_file`
 
 ## License
 The SidekiqRunner gem is licensed under the MIT license. Please see the [LICENSE](https://github.com/FlavourSys/sidekiq-runner/master/LICENSE) file for more details.
