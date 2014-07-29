@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
 
   s.authors       = ['FlavourSys Technology GmbH']
   s.email         = 'technology@flavoursys.com'
-  s.homepage      = 'http://flavoursys.com'
+  s.homepage      = 'https://github.com/FlavourSys/sidekiq-runner'
 
   s.require_paths = ['lib']
   s.files         = Dir.glob('lib/**/*.rb')
