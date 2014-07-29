@@ -1,24 +1,34 @@
-require 'sidekiq-runner/common_configuration'
-require 'fileutils'
+require 'yaml'
 
 module SidekiqRunner
-  class SidekiqConfiguration < CommonConfiguration
+  class SidekiqConfiguration
     include Enumerable
 
-    RUNNER_ATTRIBUTES = [:config_file, :daemonize]
+    RUNNER_ATTRIBUTES = [:config_file]
     RUNNER_ATTRIBUTES.each { |att| attr_accessor att }
 
     attr_reader :sidekiqs
 
     def initialize
-      @config_file = File.join(Dir.pwd, 'config', 'sidekiq.yml')
-      @daemonize   = true
+      @config_file =
+        if defined?(Rails)
+          File.join(Rails.root, 'config', 'sidekiq.yml')  
+        else
+          File.join(Dir.pwd, 'config', 'sidekiq.yml')
+        end
 
       @sidekiqs    = {}
     end
 
     def self.default
       @default ||= SidekiqConfiguration.new
+    end
+
+    def self.get
+      config = default.dup
+      config.send :merge_config_file!
+      config.send :sane?
+      config
     end
 
     def each(&block)
@@ -33,32 +43,33 @@ module SidekiqRunner
       @sidekiqs.empty?
     end
 
-    # DELETEME in the future
-    # Redefined and kept for bakward compatibility
-    def queue(name, weight = 1)
-      # Create a default sidekiq instance when no instances were created
-      fail 'Sidekiq instances hash does not seem to be empty. 
-      It means you are using the newer syntax in the initializer to create at least one instance. 
-      Therefore you should not be using the old queue() function.' unless @sidekiqs.empty?
+    def add_instance(name)
+      fail "Sidekiq instance with the name '#{name}' already exists! No duplicates please." if @sidekiqs.key?(name)
 
-      add_instance('sidekiq_default') do |skiq|
-        skiq.add_queue('default')
+      @sidekiqs[name] = SidekiqInstance.new(name)
+      yield @sidekiqs[name] if block_given?
+    end
+
+    # Top-level single instance configuration methods, partially for backward compatibility.
+
+    SidekiqInstance::CONFIG_FILE_ATTRIBUTES.each do |meth|
+      define_method("#{meth}=") do |val|
+        ensure_default_sidekiq!
+        @sidekiqs.each { |_, skiq| skiq.send("#{meth}=", val) }
       end
     end
 
-    def add_instance(name)
-      skiq = SidekiqInstance.new(name)
-      yield skiq if block_given?
+    def queue(name, weight = 1)
+      fail 'Multiple Sidekiq instances defined and queue() outside of instance block called.' if @sidekiqs.size > 1
 
-      fail "Sidekick instance with the name of #{name} already exists! No duplicates please." if @sidekiqs.has_key?(name)
-
-      FileUtils.mkdir_p(File.dirname(skiq.pidfile))
-      FileUtils.mkdir_p(File.dirname(skiq.logfile))
-
-      @sidekiqs[name] = skiq
-
-      skiq
+      ensure_default_sidekiq!
+      @sidekiqs.values.first.add_queue(name, weight)
     end
+
+    alias_method :add_queue, :queue
+    alias_method :configfile=, :config_file=
+
+    # Callbacks.
 
     %w(start stop).each do |action|
       %w(success error).each do |state|
@@ -72,44 +83,25 @@ module SidekiqRunner
 
     private
 
+    def ensure_default_sidekiq!
+      add_instance('sidekiq_default') if empty?
+    end
+
     def merge_config_file!
       sidekiqs_common_config = {}
-      yml = {}
 
-      if File.exist?(config_file)
-        yml = YAML.load_file(config_file)
-        # Get sidekiq config common for all instances
-        SidekiqInstance::CONFIG_FILE_ATTRIBUTES.each do |k|
-          v = yml[k] || yml[k.to_s]
-          sidekiqs_common_config[k] = v if v
-        end
-      end
+      yml = File.exist?(config_file) ? YAML.load_file(config_file) : {}
+      yml = Hash[yml.map { |k, v| [k.to_sym, v] }]
 
-      # Backwards compatibility
-      # Get sidekiq pidfile and logfile if no sidekiq instance was specified
-      SidekiqInstance::INDIVIDUAL_FILE_ATTRIBUTES.each do |k|
-        v = yml[k] || yml[k.to_s]
-        sidekiqs_common_config[k] = v if v
-      end
-
-      @sidekiqs.each do |name, skiq|
-        # Symbolize keys in yml hash
-        if yml[name] && yml[name].is_a?(Hash)
-          yml_config = Hash[yml[name].map { |k, v| [k.to_sym, v] }]
-        end
-        # Merge common and specific sidekiq instance configs
-        # Sidekiq instances not defined in the initializer but present in yml will be ignored
-        final_skiq_config = yml_config ? sidekiqs_common_config.merge(yml_config) : sidekiqs_common_config
-        skiq.merge_config!(final_skiq_config)
-        skiq.sane?
-      end
-
-      self
+      @sidekiqs.each_value { |skiq| skiq.merge_config_file!(yml) }
     end
 
     def sane?
-      fail 'No requirefile given and not in Rails env.' if !defined?(Rails) && !requirefile
       fail 'No sidekiq instances defined. Nothing to run.' if @sidekiqs.empty?
+      fail 'Sidekiq instances with the same pidfile found.' if @sidekiqs.values.map(&:pidfile).uniq.size < @sidekiqs.size
+      fail 'Sidekiq instances with the same logfile found.' if @sidekiqs.values.map(&:logfile).uniq.size < @sidekiqs.size
+
+      @sidekiqs.each_value { |skiq| skiq.sane? }
     end
   end
 end
