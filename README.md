@@ -1,7 +1,15 @@
 # SidekiqRunner
-This gem allows to run and monitor multiple instances of [Sidekiq](https://github.com/mperham/sidekiq). Each Sidekiq process can run with multiple queues.
+This gem allows to run and monitor multiple instances of [Sidekiq](https://github.com/mperham/sidekiq). Configuration of the individual instances can either be done in code or in a configuration file.
 
 SidekiqRunner uses [God](http://godrb.com) for monitoring Sidekiq instances. By default, God keeps all instances running and starts them whenever they fail.
+
+## Use case
+
+As of today, Sidekiq does not provide any means of starting/stopping the process automatically given a set of configuration options. Often, custom Rake tasks are written that encapsulate the Sidekiq command line parameters. Configuration is either stored directly in such Rake tasks or scripts or is placed in a YAML-formatted configuration file, in Rails environments often called `config/sidekiq.yml`.
+
+For one of our products, we wanted to be able to both specify configuration options in (versioned) code and in a configuration file that could be customized per installation site. The user should be able to adapt settings such as the path to Sidekiq's logfile, whereas basic options such as the name and weight of the queues to be processed should be set within the code and should not be modifiable by the user.
+
+Additionally, we wanted an easy way to monitor and automatically restart failed Sidekiq instances which is why [God](http://godrb.com) was introduced as a lightweight supervisor.
 
 ## Installation
 The easiest way of installing SidekiqRunner is through RubyGems:
@@ -40,7 +48,7 @@ $ [sudo] gem install sidekiq-runner
   end
   ```
 
-  * `config_file` - optional path to a yml file with SidekiqRunner configuration (it includes the SidekiqRunner config as the instances config)
+  * `config_file` - optional path to a yml file with SidekiqRunner configuration, defaults to `config/sidekiq.yml` below the current directory
   * `daemonize` - indicates whether Sidekiq instances should be daemonized 
   * `add_queue(queue_name, priority = 1)` - more details at [Sidekiq queues doc](https://github.com/mperham/sidekiq/wiki/Advanced-Options#queues)
 
@@ -62,14 +70,9 @@ $ [sudo] gem install sidekiq-runner
   end
   ```
 
-4. Start SidekiqRunner from the root of your Rails application to start all defined sidekiq instances:
+4. Start SidekiqRunner from the root of your Rails application to start all defined Sidekiq instances:
   ```bash
   $ bundle exec rake sidekiqrunner:start
-  ```
-
-5. You can chcek whether processes were started using the following command:
-  ```bash
-  $ ps aux
   ```
 
 ## Advanced configuration
@@ -83,14 +86,14 @@ end
 ```
 
 1. SidekiqRunner options:
-  * `:config_file, :daemonize`
-  * NONE overwritable by the yml file
+  * `:config_file`
+  * Not overwritable by the yml file
 2. Sidekiq instance options:
   * `:bundle_env, :chdir, :requirefile, :concurrency, :verbose, :pidfile, :logfile`
-  * ALL overwritable by the yml file
+  * All overwritable by the yml file
 3. God options:
   * `:config_file, :daemonize, :port, :syslog, :events, :options`
-  * overwritable by the yml file: `:process_name, :interval, :stop_timeout, :log_file`
+  * Overwritable by the yml file: `:process_name, :interval, :stop_timeout, :log_file`
 
 ## License
 The SidekiqRunner gem is licensed under the MIT license. Please see the [LICENSE](https://github.com/FlavourSys/sidekiq-runner/master/LICENSE) file for more details.
