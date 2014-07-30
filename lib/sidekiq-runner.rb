@@ -18,9 +18,14 @@ module SidekiqRunner
     abort 'God is already running.' if god_alive?(god_config)
 
     run(:start, sidekiq_config) do
+      $0 = "SidekiqRunner/God (#{god_config.process_name})"
+
       puts 'Starting god.'
       God::CLI::Run.new(god_config.options)
     end
+
+    sleep 1
+    fail 'Failed to start God.' unless god_alive?(god_config)
   end
 
   def self.stop
@@ -30,12 +35,12 @@ module SidekiqRunner
       God::EventHandler.load
 
       if god_alive?(god_config)
+        puts "Terminating god process #{god_config.process_name}..."
+
         sidekiq_config.each_key do |name|
-          puts "Stopping Sidekiq instance #{name}..."
           God::CLI::Command.new('stop', god_config.options, ['', name])
         end
 
-        puts "Terminating god process #{god_config.process_name}..."
         God::CLI::Command.new('terminate', god_config.options, [])
       else
         abort 'God is not running, so no need to stop it.'
@@ -46,8 +51,6 @@ module SidekiqRunner
   private
 
   def self.god_alive?(god_config)
-    puts 'Checking whether god is alive...'
-
     require 'drb'
     require 'god/socket'
     DRb.start_service('druby://127.0.0.1:0')
