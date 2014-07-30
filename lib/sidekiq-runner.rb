@@ -18,6 +18,8 @@ module SidekiqRunner
     abort 'God is already running.' if god_alive?(god_config)
 
     run(:start, sidekiq_config) do
+      $0 = "SidekiqRunner/God (#{god_config.process_name})"
+
       puts 'Starting god.'
       God::CLI::Run.new(god_config.options)
     end
