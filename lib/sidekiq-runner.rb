@@ -24,7 +24,7 @@ module SidekiqRunner
       God::CLI::Run.new(god_config.options)
     end
 
-    sleep 1
+    sleep 5
     fail 'Failed to start God.' unless god_alive?(god_config)
   end
 
