@@ -8,7 +8,7 @@ module SidekiqRunner
 
     def self.get
       config = default.dup
-      config.send :merge_config_file!
+      config.merge_config_file!
       config
     end
 
@@ -36,6 +36,8 @@ module SidekiqRunner
     end
 
     def options
+      create_directories!
+
       {
         daemonize: @daemonize,
         port: @port,
@@ -46,8 +48,6 @@ module SidekiqRunner
       }
     end
 
-    private
-
     def merge_config_file!
       if File.exist?(config_file)
         yml = YAML.load_file(config_file)
@@ -56,6 +56,10 @@ module SidekiqRunner
           send("#{k}=", v) unless v.nil?
         end
       end
+    end
+
+    def create_directories!
+      FileUtils.mkdir_p(File.dirname(log_file))
     end
   end
 end
