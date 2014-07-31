@@ -26,8 +26,8 @@ module SidekiqRunner
 
     def self.get
       config = default.dup
-      config.send :merge_config_file!
-      config.send :sane?
+      config.merge_config_file!
+      config.sane?
       config
     end
 
@@ -80,8 +80,6 @@ module SidekiqRunner
         end
       end
     end
-
-    private
 
     def ensure_default_sidekiq!
       add_instance('sidekiq_default') if empty?

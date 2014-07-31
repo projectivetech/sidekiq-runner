@@ -8,7 +8,7 @@ module SidekiqRunner
 
     def self.get
       config = default.dup
-      config.send :merge_config_file!
+      config.merge_config_file!
       config
     end
 
@@ -47,8 +47,6 @@ module SidekiqRunner
         log: @log_file
       }
     end
-
-    private
 
     def merge_config_file!
       if File.exist?(config_file)
