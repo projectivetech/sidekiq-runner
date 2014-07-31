@@ -52,7 +52,7 @@ module SidekiqRunner
 
     # Top-level single instance configuration methods, partially for backward compatibility.
 
-    SidekiqInstance::CONFIG_FILE_ATTRIBUTES.each do |meth|
+    (SidekiqInstance::CONFIG_FILE_ATTRIBUTES + SidekiqInstance::RUNNER_ATTRIBUTES).each do |meth|
       define_method("#{meth}=") do |val|
         ensure_default_sidekiq!
         @sidekiqs.each { |_, skiq| skiq.send("#{meth}=", val) }

@@ -1,7 +1,10 @@
 module SidekiqRunner
   class SidekiqInstance
 
-    CONFIG_FILE_ATTRIBUTES = [:bundle_env, :chdir, :requirefile, :concurrency, :verbose, :pidfile, :logfile]
+    RUNNER_ATTRIBUTES = [:bundle_env, :chdir, :requirefile]
+    RUNNER_ATTRIBUTES.each { |att| attr_accessor att }
+
+    CONFIG_FILE_ATTRIBUTES = [:concurrency, :verbose, :pidfile, :logfile]
     CONFIG_FILE_ATTRIBUTES.each { |att| attr_accessor att }
 
     attr_reader :name, :queues
