@@ -50,6 +50,8 @@ module SidekiqRunner
     end
 
     def build_start_command
+      create_directories!
+
       cmd = []
       cmd << (bundle_env ? 'bundle exec sidekiq' : 'sidekiq')
       cmd << '-d'
@@ -75,6 +77,13 @@ module SidekiqRunner
       cmd << timeout
 
       cmd.join(' ')
+    end
+
+    private
+
+    def create_directories!
+      FileUtils.mkdir_p(File.dirname(logfile))
+      FileUtils.mkdir_p(File.dirname(pidfile))
     end
   end
 end

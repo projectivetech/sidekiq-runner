@@ -36,6 +36,8 @@ module SidekiqRunner
     end
 
     def options
+      create_directories!
+
       {
         daemonize: @daemonize,
         port: @port,
@@ -56,6 +58,10 @@ module SidekiqRunner
           send("#{k}=", v) unless v.nil?
         end
       end
+    end
+
+    def create_directories!
+      FileUtils.mkdir_p(File.dirname(log_file))
     end
   end
 end
