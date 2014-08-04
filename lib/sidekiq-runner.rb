@@ -48,6 +48,10 @@ module SidekiqRunner
     end
   end
 
+  def self.running?
+    god_alive? GodConfiguration.get
+  end
+
   private
 
   def self.god_alive?(god_config)
