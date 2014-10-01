@@ -65,7 +65,7 @@ module SidekiqRunner
       cmd << "-P #{pidfile}"
       cmd << "-e #{Rails.env}" if defined?(Rails)
       cmd << "-r #{requirefile}" if requirefile
-      cmd << "-g #{tag}"
+      cmd << "-g '#{tag}'"
 
       queues.each do |q, w|
         cmd << "-q #{q},#{w.to_s}"
