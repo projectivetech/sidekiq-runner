@@ -23,7 +23,7 @@ sidekiq_config.each do |name, skiq|
 
     # Working directory has to be set properly.
     # Be aware that by default, God sets the working directory to / (root dir).
-    w.dir = skiq.chdir || Rails.root || Dir.pwd
+    w.dir = skiq.chdir || (defined?(Rails) ? Rails.root : Dir.pwd)
 
     # Determine the state on startup.
     # If process is running move to 'up' state, otherwise move to 'start' state.
