@@ -176,6 +176,12 @@ Options for Sidekiq instances may either be set inside an instance block, in whi
       <td>Log file of the Sidekiq instance</td>
       <td>&#10003;</td>
     </tr>
+    <tr>
+      <td><code>tag</code></td>
+      <td><code>#{name}</code></td>
+      <td>Sets the Sidekiq process tag</td>
+      <td>&#10003;</td>
+    </tr>
   </tbody>
 </table>
 
