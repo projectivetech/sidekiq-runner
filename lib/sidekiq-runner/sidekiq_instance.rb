@@ -4,7 +4,7 @@ module SidekiqRunner
     RUNNER_ATTRIBUTES = [:bundle_env, :chdir, :requirefile]
     RUNNER_ATTRIBUTES.each { |att| attr_accessor att }
 
-    CONFIG_FILE_ATTRIBUTES = [:concurrency, :verbose, :pidfile, :logfile]
+    CONFIG_FILE_ATTRIBUTES = [:concurrency, :verbose, :pidfile, :logfile, :tag]
     CONFIG_FILE_ATTRIBUTES.each { |att| attr_accessor att }
 
     attr_reader :name, :queues
@@ -22,6 +22,7 @@ module SidekiqRunner
       @logfile      = File.join(Dir.pwd, 'log', "#{@name}.log")
       @concurrency  = 4
       @verbose      = false
+      @tag          = name
     end
 
     def add_queue(queue_name, weight = 1)
@@ -64,6 +65,7 @@ module SidekiqRunner
       cmd << "-P #{pidfile}"
       cmd << "-e #{Rails.env}" if defined?(Rails)
       cmd << "-r #{requirefile}" if requirefile
+      cmd << "-g #{tag}"
 
       queues.each do |q, w|
         cmd << "-q #{q},#{w.to_s}"
