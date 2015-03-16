@@ -96,6 +96,7 @@ end
 
 SidekiqRunner.configure_god do |god_config|
   god_config.interval = 30
+  god_config.maximum_memory_usage = 4000 # 4 GB.
 end
 ```
 
@@ -251,6 +252,12 @@ God configuration options, also some of them overwritable by the config file. Fo
       <td><code>log_file</code></td>
       <td><code>$PWD/log/god.log</code></td>
       <td>Log file of the God process</td>
+      <td>&#10003;</td>
+    </tr>
+    <tr>
+      <td><code>maximum_memory_usage</code></td>
+      <td>(unset)</td>
+      <td>Restart instance when it hits memory limit (in MB)</td>
       <td>&#10003;</td>
     </tr>
   </tbody>
