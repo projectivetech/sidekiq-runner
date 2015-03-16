@@ -242,12 +242,6 @@ God configuration options, also some of them overwritable by the config file. Fo
       <td>&#10003;</td>
     </tr>
     <tr>
-      <td><code>interval</code></td>
-      <td><code>30</code></td>
-      <td>Monitor interval</td>
-      <td>&#10003;</td>
-    </tr>
-    <tr>
       <td><code>stop_timeout</code></td>
       <td><code>30</code></td>
       <td>Stop timeout</td>
