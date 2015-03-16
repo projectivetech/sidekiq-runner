@@ -4,7 +4,7 @@ module SidekiqRunner
     RUNNER_ATTRIBUTES = [:bundle_env, :chdir, :requirefile]
     RUNNER_ATTRIBUTES.each { |att| attr_accessor att }
 
-    CONFIG_FILE_ATTRIBUTES = [:concurrency, :verbose, :pidfile, :logfile, :tag]
+    CONFIG_FILE_ATTRIBUTES = [:concurrency, :verbose, :pidfile, :logfile, :tag, :rbtrace]
     CONFIG_FILE_ATTRIBUTES.each { |att| attr_accessor att }
 
     attr_reader :name, :queues
@@ -23,6 +23,7 @@ module SidekiqRunner
       @concurrency  = 4
       @verbose      = false
       @tag          = name
+      @rbtrace      = false
     end
 
     def add_queue(queue_name, weight = 1)
@@ -57,7 +58,8 @@ module SidekiqRunner
       create_directories!
 
       cmd = []
-      cmd << (bundle_env ? 'bundle exec sidekiq' : 'sidekiq')
+      cmd << 'bundle exec' if bundle_env
+      cmd << (rbtrace ? File.expand_path('../../../script/sidekiq_rbtrace', __FILE__) : 'sidekiq')
       cmd << '-d'
       cmd << "-c #{concurrency}"
       cmd << '-v' if verbose

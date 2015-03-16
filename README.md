@@ -182,6 +182,12 @@ Options for Sidekiq instances may either be set inside an instance block, in whi
       <td>Sets the Sidekiq process tag</td>
       <td>&#10003;</td>
     </tr>
+    <tr>
+      <td><code>rbtrace</code></td>
+      <td><code>false</code></td>
+      <td>Requires <code>rbtrace</code> in the Sidekiq instance</td>
+      <td>&#10003;</td>
+    </tr>
   </tbody>
 </table>
 
@@ -295,7 +301,13 @@ SidekiqRunner.configure do |config|
 end
 ```
 
+### rbtrace integration
 
+For convenience (and because we found some of our Sidekiq processes gaining a lot of memory weight over time) there's a [rbtrace](https://github.com/tmm1/rbtrace) wrapper included. After you set the `:rbtrace` configuration option to your instance, you'll be able to gather all kinds of process information. For a start, try:
+
+```sh
+rbtrace -p <PID of sidekiq process> --firehose
+```
 
 ## Start & Stop
 
