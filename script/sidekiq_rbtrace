@@ -2,13 +2,7 @@
 
 require 'rbtrace'
 
-sidekiq = `which sidekiq` rescue ''
-
-if sidekiq.empty?
-
-  # When we can't locate the Sidekiq executable, mimick
-  # its behaviour here.
-
+def sidekiq_bin
   require 'sidekiq/cli'
 
   begin
@@ -21,11 +15,18 @@ if sidekiq.empty?
     STDERR.puts e.backtrace.join("\n")
     exit 1
   end
+end
 
+sidekiq = `which sidekiq` rescue ''
+if sidekiq.empty?
+  # When we can't locate the Sidekiq executable, mimick
+  # its behaviour here.
+  sidekiq_bin
 else
-
-  # Otherwise load the sidekiq executable.
-
-  load sidekiq.strip
-
+  begin
+    # Otherwise load the sidekiq executable.
+    load sidekiq.strip
+  rescue
+    sidekiq_bin
+  end
 end
