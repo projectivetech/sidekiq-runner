@@ -15,13 +15,14 @@ module SidekiqRunner
     RUNNER_ATTRIBUTES = [:config_file, :daemonize, :port, :syslog, :events]
     RUNNER_ATTRIBUTES.each { |att| attr_accessor att }
 
-    CONFIG_FILE_ATTRIBUTES = [:process_name, :interval, :stop_timeout, :log_file]
+    CONFIG_FILE_ATTRIBUTES = [:process_name, :interval, :stop_timeout, :log_file, :maximum_memory_usage]
     CONFIG_FILE_ATTRIBUTES.each { |att| attr_accessor att }
 
     def initialize
       @process_name = 'sidekiq'
       @interval  = 30
       @stop_timeout = 30
+      @maximum_memory_usage = nil
 
       @log_file   = File.join(Dir.pwd, 'log', 'god.log')
       @config_file  = File.join(Dir.pwd, 'config', 'god.yml')

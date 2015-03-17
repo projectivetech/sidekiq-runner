@@ -96,6 +96,7 @@ end
 
 SidekiqRunner.configure_god do |god_config|
   god_config.interval = 30
+  god_config.maximum_memory_usage = 4000 # 4 GB.
 end
 ```
 
@@ -182,6 +183,12 @@ Options for Sidekiq instances may either be set inside an instance block, in whi
       <td>Sets the Sidekiq process tag</td>
       <td>&#10003;</td>
     </tr>
+    <tr>
+      <td><code>rbtrace</code></td>
+      <td><code>false</code></td>
+      <td>Requires <code>rbtrace</code> in the Sidekiq instance</td>
+      <td>&#10003;</td>
+    </tr>
   </tbody>
 </table>
 
@@ -242,12 +249,6 @@ God configuration options, also some of them overwritable by the config file. Fo
       <td>&#10003;</td>
     </tr>
     <tr>
-      <td><code>interval</code></td>
-      <td><code>30</code></td>
-      <td>Monitor interval</td>
-      <td>&#10003;</td>
-    </tr>
-    <tr>
       <td><code>stop_timeout</code></td>
       <td><code>30</code></td>
       <td>Stop timeout</td>
@@ -257,6 +258,12 @@ God configuration options, also some of them overwritable by the config file. Fo
       <td><code>log_file</code></td>
       <td><code>$PWD/log/god.log</code></td>
       <td>Log file of the God process</td>
+      <td>&#10003;</td>
+    </tr>
+    <tr>
+      <td><code>maximum_memory_usage</code></td>
+      <td>(unset)</td>
+      <td>Restart instance when it hits memory limit (in MB)</td>
       <td>&#10003;</td>
     </tr>
   </tbody>
@@ -301,7 +308,13 @@ SidekiqRunner.configure do |config|
 end
 ```
 
+### rbtrace integration
 
+For convenience (and because we found some of our Sidekiq processes gaining a lot of memory weight over time) there's a [rbtrace](https://github.com/tmm1/rbtrace) wrapper included. After you set the `:rbtrace` configuration option to your instance, you'll be able to gather all kinds of process information. For a start, try:
+
+```sh
+rbtrace -p <PID of sidekiq process> --firehose
+```
 
 ## Start & Stop
 

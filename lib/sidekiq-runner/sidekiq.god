@@ -61,6 +61,17 @@ sidekiq_config.each do |name, skiq|
       end
     end
 
+    # Monitor process memory usage.
+    if god_config.maximum_memory_usage
+      w.restart_if do |restart|
+        restart.condition(:memory_usage) do |c|
+          c.above = god_config.maximum_memory_usage.to_i.megabytes
+          c.times = 3
+          c.interval = god_config.interval
+        end
+      end
+    end
+
     w.lifecycle do |on|
       on.condition(:flapping) do |c|
         c.to_state = [:start, :restart] # If this watch is started or restarted...
