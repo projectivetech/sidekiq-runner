@@ -15,7 +15,7 @@ module SidekiqRunner
     RUNNER_ATTRIBUTES = [:config_file, :daemonize, :port, :syslog, :events]
     RUNNER_ATTRIBUTES.each { |att| attr_accessor att }
 
-    CONFIG_FILE_ATTRIBUTES = [:process_name, :interval, :stop_timeout, :log_file, :maximum_memory_usage]
+    CONFIG_FILE_ATTRIBUTES = [:process_name, :interval, :stop_timeout, :log_file, :maximum_memory_usage, :pid]
     CONFIG_FILE_ATTRIBUTES.each { |att| attr_accessor att }
 
     def initialize
@@ -30,8 +30,9 @@ module SidekiqRunner
       @daemonize = true
       @syslog = true
       @events = true
+      @pid = nil
 
-      # This is going to be a part of the .sock file name e.g. "/tmp/god.17165.sock"
+      # This is going to be a part of the .sock file name e.g. "/tmp/god.17165.sock" and the pidfile name
       # Change this in the configuration file to be able to run multiple instances of god.
       @port = 17165
     end
@@ -45,7 +46,8 @@ module SidekiqRunner
         syslog: @syslog,
         events: @events,
         config: File.expand_path("../sidekiq.god", __FILE__),
-        log: @log_file
+        log: @log_file,
+        pid: @pid
       }
     end
 
