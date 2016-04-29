@@ -4,7 +4,7 @@ module SidekiqRunner
     RUNNER_ATTRIBUTES = [:bundle_env, :chdir, :requirefile]
     RUNNER_ATTRIBUTES.each { |att| attr_accessor att }
 
-    CONFIG_FILE_ATTRIBUTES = [:concurrency, :verbose, :pidfile, :logfile, :tag, :rbtrace]
+    CONFIG_FILE_ATTRIBUTES = [:concurrency, :verbose, :pidfile, :logfile, :tag, :rbtrace, :queues]
     CONFIG_FILE_ATTRIBUTES.each { |att| attr_accessor att }
 
     attr_reader :name, :queues
@@ -50,7 +50,7 @@ module SidekiqRunner
     end
 
     def sane?
-      fail "No queues given for #{@name}!" if @queues.empty?  
+      fail "No queues given for #{@name}!" if @queues.empty?
       fail "No requirefile given for #{@name} and not in Rails environment!" if !defined?(Rails) && !requirefile
     end
 
