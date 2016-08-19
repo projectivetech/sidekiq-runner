@@ -21,6 +21,10 @@ sidekiq_config.each do |name, skiq|
     w.pid_file = skiq.pidfile
     w.behavior(:clean_pid_file)
 
+    # Set uid/gid if requested.
+    w.uid = skiq.uid if skiq.uid
+    w.gid = skiq.gid if skiq.gid
+
     # Working directory has to be set properly.
     # Be aware that by default, God sets the working directory to / (root dir).
     w.dir = skiq.chdir || (defined?(Rails) ? Rails.root : Dir.pwd)
