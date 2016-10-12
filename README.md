@@ -91,6 +91,15 @@ SidekiqRunner.configure do |config|
     instance.add_queue 'cartman'
     instance.pidfile = '/path/to/the/pid-file.pid'
     instance.logfile = '/path/to/the/log-file.log'
+
+    # Add custom god worker configuration options
+    instance.god_config do |w|
+      w.restart_if do |restart|
+        restart.condition(:my_custom_restart_condition) do |c|
+          c.interval = 60
+        end
+      end
+    end
   end
 end
 

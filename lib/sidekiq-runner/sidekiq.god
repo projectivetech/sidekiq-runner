@@ -76,6 +76,10 @@ sidekiq_config.each do |name, skiq|
       end
     end
 
+    if skiq.config_blocks.length > 0
+      skiq.config_blocks.each { |blk| blk.call(w) }
+    end
+
     w.lifecycle do |on|
       on.condition(:flapping) do |c|
         c.to_state = [:start, :restart] # If this watch is started or restarted...
