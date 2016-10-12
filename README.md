@@ -323,6 +323,15 @@ SidekiqRunner.configure do |config|
 end
 ```
 
+```ruby
+SidekiqRunner.configure_god do |config|
+  config.before_start do
+    require_relative '../../lib/my_custom_restart_condition'
+  end
+  config.before_stop do ... end
+end
+```
+
 ### rbtrace integration
 
 For convenience (and because we found some of our Sidekiq processes gaining a lot of memory weight over time) there's a [rbtrace](https://github.com/tmm1/rbtrace) wrapper included. After you set the `:rbtrace` configuration option to your instance, you'll be able to gather all kinds of process information. For a start, try:

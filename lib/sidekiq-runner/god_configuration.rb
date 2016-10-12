@@ -66,5 +66,13 @@ module SidekiqRunner
     def create_directories!
       FileUtils.mkdir_p(File.dirname(log_file))
     end
+
+    %w(start stop).each do |action|
+      attr_reader "before_#{action}_cb".to_sym
+
+      define_method("before_#{action}") do |&block|
+        instance_variable_set("@before_#{action}_cb".to_sym, block)
+      end
+    end
   end
 end
