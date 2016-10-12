@@ -237,6 +237,12 @@ God configuration options, also some of them overwritable by the config file. Fo
       <td></td>
     </tr>
     <tr>
+      <td><code>log_level</code></td>
+      <td>:warn</td>
+      <td>God's log level (<code>debug</code>,<code>info</code>,<code>warn</code>,<code>error</code> or<code>fatal</code>)</td>
+      <td></td>
+    </tr>
+    <tr>
       <td><code>process_name</code></td>
       <td><code>sidekiq</code></td>
       <td>Name of the God process (SidekiqRunner will show up as <code>SidekiqRunner/God (#{name})</code> in process listings)</td>
