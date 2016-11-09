@@ -91,6 +91,15 @@ SidekiqRunner.configure do |config|
     instance.add_queue 'cartman'
     instance.pidfile = '/path/to/the/pid-file.pid'
     instance.logfile = '/path/to/the/log-file.log'
+
+    # Add custom god worker configuration options
+    instance.god_config do |w|
+      w.restart_if do |restart|
+        restart.condition(:my_custom_restart_condition) do |c|
+          c.interval = 60
+        end
+      end
+    end
   end
 end
 
@@ -237,6 +246,12 @@ God configuration options, also some of them overwritable by the config file. Fo
       <td></td>
     </tr>
     <tr>
+      <td><code>log_level</code></td>
+      <td>:warn</td>
+      <td>God's log level (<code>debug</code>,<code>info</code>,<code>warn</code>,<code>error</code> or<code>fatal</code>)</td>
+      <td></td>
+    </tr>
+    <tr>
       <td><code>process_name</code></td>
       <td><code>sidekiq</code></td>
       <td>Name of the God process (SidekiqRunner will show up as <code>SidekiqRunner/God (#{name})</code> in process listings)</td>
@@ -305,6 +320,15 @@ SidekiqRunner.configure do |config|
   config.on_start_error do ... end
   config.on_stop_success do ... end
   config.on_stop_error do ... end
+end
+```
+
+```ruby
+SidekiqRunner.configure_god do |config|
+  config.before_start do
+    require_relative '../../lib/my_custom_restart_condition'
+  end
+  config.before_stop do ... end
 end
 ```
 
