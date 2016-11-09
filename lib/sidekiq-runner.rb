@@ -17,7 +17,7 @@ module SidekiqRunner
 
     abort 'God is already running.' if god_alive?(god_config)
 
-    run(:start, sidekiq_config) do
+    run(:start, sidekiq_config, god_config) do
       $0 = "SidekiqRunner/God (#{god_config.process_name})"
 
       puts 'Starting god.'
@@ -31,7 +31,7 @@ module SidekiqRunner
   def self.stop
     sidekiq_config, god_config = SidekiqConfiguration.get, GodConfiguration.get
 
-    run(:stop, sidekiq_config) do
+    run(:stop, sidekiq_config, god_config) do
       God::EventHandler.load
 
       if god_alive?(god_config)
@@ -69,13 +69,18 @@ module SidekiqRunner
     true
   end
 
-  def self.run(action, sidekiq_config)
+  def self.run(action, sidekiq_config, god_config)
     begin
 
       # Use this flag to actually load all of the god infrastructure.
       $load_god = true
       require 'god'
       require 'god/cli/run'
+
+      if [:start, :stop].include? action
+        cb = god_config.send("before_#{action}_cb".to_sym)
+        cb.call if cb
+      end
 
       # Peform the action.
       yield if block_given?

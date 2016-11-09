@@ -7,7 +7,7 @@ module SidekiqRunner
     CONFIG_FILE_ATTRIBUTES = [:concurrency, :verbose, :pidfile, :logfile, :tag, :rbtrace, :uid, :gid]
     CONFIG_FILE_ATTRIBUTES.each { |att| attr_accessor att }
 
-    attr_reader :name, :queues
+    attr_reader :name, :queues, :config_blocks
 
     def initialize(name)
       fail "No sidekiq instance name given!" if name.empty?
@@ -26,6 +26,7 @@ module SidekiqRunner
       @rbtrace      = false
       @uid          = nil
       @gid          = nil
+      @config_blocks = []
     end
 
     def add_queue(queue_name, weight = 1)
@@ -33,6 +34,10 @@ module SidekiqRunner
       fail "Cannot add the queue. The weight is not an integer!" unless weight.is_a? Integer
       fail "Cannot add the queue. The queue with \"#{queue_name}\" name already exist" if @queues.any? { |q| q.first == queue_name }
       @queues << [queue_name, weight]
+    end
+
+    def god_config(&block)
+      @config_blocks << block
     end
 
     def merge_config_file!(yml)
