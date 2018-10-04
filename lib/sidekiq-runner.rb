@@ -86,12 +86,12 @@ module SidekiqRunner
       yield if block_given?
 
     rescue SystemExit => e
-      cb = e.success? ? "#{action}_success_cb" : "#{action}_error_cb"
+      sidekiq_cb = e.success? ? "#{action}_success_cb" : "#{action}_error_cb"
     ensure
       if [:start, :stop].include? action
-        cb = "#{action}_success_cb" unless cb
-        cb = sidekiq_config.send(cb.to_sym)
-        cb.call if cb
+        sidekiq_cb = "#{action}_success_cb" unless sidekiq_cb
+        sidekiq_cb = sidekiq_config.send(sidekiq_cb.to_sym)
+        sidekiq_cb.call if sidekiq_cb
       end
     end
   end
