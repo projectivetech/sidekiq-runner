@@ -64,7 +64,7 @@ module SidekiqRunner
     end
 
     def create_directories!
-      FileUtils.mkdir_p(File.dirname(log_file))
+      FileUtils.mkdir_p(File.dirname(log_file)) if log_file
     end
 
     %w(start stop).each do |action|
