@@ -15,6 +15,6 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
   s.files         = Dir.glob('lib/**/*.rb') + ['lib/sidekiq-runner/sidekiq.god'] + Dir.glob('script/*')
 
-  s.add_dependency 'rake', '~> 10.3'
+  s.add_dependency 'rake'
   s.add_dependency 'god', '~> 0.13'
 end

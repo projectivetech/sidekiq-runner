@@ -6,6 +6,12 @@ god_config = SidekiqRunner::GodConfiguration.get
 
 God.terminate_timeout = god_config.stop_timeout + 10
 
+god_config.generic_watchers.each do |block|
+  God.watch do |w|
+    block.call(w)
+  end
+end
+
 sidekiq_config.each do |name, skiq|
   God.watch do |w|
     w.name = name

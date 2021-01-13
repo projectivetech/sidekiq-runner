@@ -18,6 +18,8 @@ module SidekiqRunner
     CONFIG_FILE_ATTRIBUTES = [:process_name, :interval, :stop_timeout, :log_file, :log_level, :maximum_memory_usage, :pid]
     CONFIG_FILE_ATTRIBUTES.each { |att| attr_accessor att }
 
+    attr_reader :generic_watchers
+
     def initialize
       @process_name = 'sidekiq'
       @interval  = 30
@@ -36,6 +38,12 @@ module SidekiqRunner
       # This is going to be a part of the .sock file name e.g. "/tmp/god.17165.sock" and the pidfile name
       # Change this in the configuration file to be able to run multiple instances of god.
       @port = 17165
+
+      @generic_watchers = []
+    end
+
+    def add_generic(&blk)
+      @generic_watchers << blk
     end
 
     def options
