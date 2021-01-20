@@ -67,10 +67,8 @@ module SidekiqRunner
       cmd = []
       cmd << 'bundle exec' if bundle_env
       cmd << (rbtrace ? File.expand_path('../../../script/sidekiq_rbtrace', __FILE__) : 'sidekiq')
-      cmd << '-d'
       cmd << "-c #{concurrency}"
       cmd << '-v' if verbose
-      cmd << "-L #{logfile}"
       cmd << "-P #{pidfile}"
       cmd << "-e #{Rails.env}" if defined?(Rails)
       cmd << "-r #{requirefile}" if requirefile
@@ -79,6 +77,9 @@ module SidekiqRunner
       queues.each do |q, w|
         cmd << "-q #{q},#{w.to_s}"
       end
+
+      # Sidekiq 6 does not log to files anymore
+      cmd << "2>&1 >> #{logfile}"
 
       cmd.join(' ')
     end
