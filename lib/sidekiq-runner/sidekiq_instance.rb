@@ -1,6 +1,5 @@
 module SidekiqRunner
   class SidekiqInstance
-
     RUNNER_ATTRIBUTES = [:bundle_env, :chdir, :requirefile]
     RUNNER_ATTRIBUTES.each { |att| attr_accessor att }
 
@@ -10,7 +9,7 @@ module SidekiqRunner
     attr_reader :name, :queues, :config_blocks
 
     def initialize(name)
-      fail "No sidekiq instance name given!" if name.empty?
+      raise "No sidekiq instance name given!" if name.empty?
 
       @name = name
       @queues = []
@@ -30,9 +29,10 @@ module SidekiqRunner
     end
 
     def add_queue(queue_name, weight = 1)
-      fail "Cannot add the queue. The name is empty!" if queue_name.empty?
-      fail "Cannot add the queue. The weight is not an integer!" unless weight.is_a? Integer
-      fail "Cannot add the queue. The queue with \"#{queue_name}\" name already exist" if @queues.any? { |q| q.first == queue_name }
+      raise "Cannot add the queue. The name is empty!" if queue_name.empty?
+      raise "Cannot add the queue. The weight is not an integer!" unless weight.is_a? Integer
+      raise "Cannot add the queue. The queue with \"#{queue_name}\" name already exist" if @queues.any? { |q| q.first == queue_name }
+
       @queues << [queue_name, weight]
     end
 
@@ -47,7 +47,7 @@ module SidekiqRunner
       end
 
       # Override with instance-specific options.
-      if (syml = yml[@name.to_sym]) && (syml.is_a?(Hash))
+      if (syml = yml[@name.to_sym]) && syml.is_a?(Hash)
         syml = Hash[syml.map { |k, v| [k.to_sym, v] }]
 
         SidekiqInstance::CONFIG_FILE_ATTRIBUTES.each do |k|
@@ -57,8 +57,8 @@ module SidekiqRunner
     end
 
     def sane?
-      fail "No queues given for #{@name}!" if @queues.empty?  
-      fail "No requirefile given for #{@name} and not in Rails environment!" if !defined?(Rails) && !requirefile
+      raise "No queues given for #{@name}!" if @queues.empty?
+      raise "No requirefile given for #{@name} and not in Rails environment!" if !defined?(Rails) && !requirefile
     end
 
     def build_start_command
@@ -66,7 +66,7 @@ module SidekiqRunner
 
       cmd = []
       cmd << 'bundle exec' if bundle_env
-      cmd << (rbtrace ? File.expand_path('../../../script/sidekiq_rbtrace', __FILE__) : 'sidekiq')
+      cmd << (rbtrace ? File.expand_path('../../script/sidekiq_rbtrace', __dir__) : 'sidekiq')
       cmd << "-c #{concurrency}"
       cmd << '-v' if verbose
       cmd << "-P #{pidfile}"
@@ -75,7 +75,7 @@ module SidekiqRunner
       cmd << "-g '#{tag}'"
 
       queues.each do |q, w|
-        cmd << "-q #{q},#{w.to_s}"
+        cmd << "-q #{q},#{w}"
       end
 
       # Sidekiq 6 does not log to files anymore
