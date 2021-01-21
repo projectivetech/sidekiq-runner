@@ -78,9 +78,6 @@ module SidekiqRunner
         cmd << "-q #{q},#{w}"
       end
 
-      # Sidekiq 6 does not log to files anymore
-      cmd << "2>&1 >> #{logfile}"
-
       cmd.join(' ')
     end
 

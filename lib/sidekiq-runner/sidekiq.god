@@ -19,6 +19,9 @@ sidekiq_config.each do |name, skiq|
     # Set start command.
     w.start = skiq.build_start_command
 
+    # Set logfile
+    w.log = skiq.logfile
+
     # Set stop command.
     w.stop = skiq.build_stop_command(god_config.stop_timeout)
     w.stop_timeout = god_config.stop_timeout
