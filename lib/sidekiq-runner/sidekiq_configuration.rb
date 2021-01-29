@@ -86,8 +86,6 @@ module SidekiqRunner
     end
 
     def merge_config_file!
-      sidekiqs_common_config = {}
-
       yml = File.exist?(config_file) ? YAML.load_file(config_file) : {}
       yml = Hash[yml.map { |k, v| [k.to_sym, v] }]
 
@@ -96,8 +94,6 @@ module SidekiqRunner
 
     def sane?
       fail 'No sidekiq instances defined. Nothing to run.' if @sidekiqs.empty?
-      fail 'Sidekiq instances with the same pidfile found.' if @sidekiqs.values.map(&:pidfile).uniq.size < @sidekiqs.size
-      fail 'Sidekiq instances with the same logfile found.' if @sidekiqs.values.map(&:logfile).uniq.size < @sidekiqs.size
 
       @sidekiqs.each_value { |skiq| skiq.sane? }
     end
