@@ -81,16 +81,6 @@ module SidekiqRunner
       cmd.join(' ')
     end
 
-    def build_stop_command(timeout)
-      cmd = []
-      cmd << (bundle_env ? 'bundle exec sidekiqctl' : 'sidekiqctl')
-      cmd << 'stop'
-      cmd << pidfile
-      cmd << timeout
-
-      cmd.join(' ')
-    end
-
     private
 
     def create_directories!

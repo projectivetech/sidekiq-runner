@@ -23,7 +23,6 @@ sidekiq_config.each do |name, skiq|
     w.log = skiq.logfile
 
     # Set stop command.
-    w.stop = skiq.build_stop_command(god_config.stop_timeout)
     w.stop_timeout = god_config.stop_timeout
 
     # Set uid/gid if requested.
