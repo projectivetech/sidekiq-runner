@@ -12,7 +12,7 @@ module SidekiqRunner
     def initialize
       @config_file =
         if defined?(Rails)
-          File.join(Rails.root, 'config', 'sidekiq.yml')  
+          File.join(Rails.root, 'config', 'sidekiq.yml')
         else
           File.join(Dir.pwd, 'config', 'sidekiq.yml')
         end
