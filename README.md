@@ -84,12 +84,11 @@ SidekiqRunner.configure do |config|
 
     # Default weight is 1.
     instance.add_queue 'raj'
-  end 
+  end
 
   config.add_instance('southpark') do |instance|
     instance.concurrency = 30
     instance.add_queue 'cartman'
-    instance.pidfile = '/path/to/the/pid-file.pid'
     instance.logfile = '/path/to/the/log-file.log'
 
     # Add custom god worker configuration options
@@ -173,12 +172,6 @@ Options for Sidekiq instances may either be set inside an instance block, in whi
       <td><code>nil</code></td>
       <td>Tells Sidekiq to load this file as main entry point</td>
       <td></td>
-    </tr>
-    <tr>
-      <td><code>pidfile</code></td>
-      <td><code>$PWD/tmp/pids/#{name}.pid</code></td>
-      <td>PID file of the Sidekiq instance</td>
-      <td>&#10003;</td>
     </tr>
     <tr>
       <td><code>logfile</code></td>
