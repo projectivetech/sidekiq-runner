@@ -48,6 +48,17 @@ module SidekiqRunner
     end
   end
 
+  def self.restart(sidekiq_instances: [])
+    sidekiq_config = SidekiqConfiguration.get
+    god_config = GodConfiguration.get
+
+    return unless god_alive?(god_config)
+
+    sidekiq_config.each_key do |name|
+      God::CLI::Command.new('restart', god_config.options, ['', name]) if sidekiq_instances.empty? || sidekiq_instances.include?(name.to_sym)
+    end
+  end
+
   def self.running?
     god_alive? GodConfiguration.get
   end
@@ -86,12 +97,12 @@ module SidekiqRunner
       yield if block_given?
 
     rescue SystemExit => e
-      cb = e.success? ? "#{action}_success_cb" : "#{action}_error_cb"
+      sidekiq_cb = e.success? ? "#{action}_success_cb" : "#{action}_error_cb"
     ensure
       if [:start, :stop].include? action
-        cb = "#{action}_success_cb" unless cb
-        cb = sidekiq_config.send(cb.to_sym)
-        cb.call if cb
+        sidekiq_cb = "#{action}_success_cb" unless sidekiq_cb
+        sidekiq_cb = sidekiq_config.send(sidekiq_cb.to_sym)
+        sidekiq_cb.call if sidekiq_cb
       end
     end
   end
