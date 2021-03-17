@@ -17,4 +17,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'rake'
   s.add_dependency 'god', '~> 0.13'
+  s.add_dependency 'sidekiq', '~> 6.0'
 end
