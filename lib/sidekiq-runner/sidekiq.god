@@ -19,13 +19,11 @@ sidekiq_config.each do |name, skiq|
     # Set start command.
     w.start = skiq.build_start_command
 
-    # Set stop command.
-    w.stop = skiq.build_stop_command(god_config.stop_timeout)
-    w.stop_timeout = god_config.stop_timeout
+    # Set logfile
+    w.log = skiq.logfile
 
-    # Make sure the pidfile is deleted as sidekiqctl does not delete stale pidfiles.
-    w.pid_file = skiq.pidfile
-    w.behavior(:clean_pid_file)
+    # Set stop command.
+    w.stop_timeout = god_config.stop_timeout
 
     # Set uid/gid if requested.
     w.uid = skiq.uid if skiq.uid
