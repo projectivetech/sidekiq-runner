@@ -54,8 +54,10 @@ module SidekiqRunner
 
     return unless god_alive?(god_config)
 
-    sidekiq_config.each_key do |name|
-      God::CLI::Command.new('restart', god_config.options, ['', name]) if sidekiq_instances.empty? || sidekiq_instances.include?(name.to_sym)
+    run(:restart, sidekiq_config, god_config) do
+      sidekiq_config.each_key do |name|
+        God::CLI::Command.new('restart', god_config.options, ['', name]) if sidekiq_instances.empty? || sidekiq_instances.include?(name.to_sym)
+      end
     end
   end
 
