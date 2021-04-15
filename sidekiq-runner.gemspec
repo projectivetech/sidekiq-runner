@@ -8,9 +8,9 @@ Gem::Specification.new do |s|
   s.summary       = 'Sidekiq configuration and rake tasks'
   s.description   = 'Provide an easy way to configure, start, and monitor all your Sidekiq processes'
 
-  s.authors       = ['FlavourSys Technology GmbH']
-  s.email         = 'technology@flavoursys.com'
-  s.homepage      = 'https://github.com/FlavourSys/sidekiq-runner'
+  s.authors       = ['Projective Technology GmbH']
+  s.email         = 'technology@projective.io'
+  s.homepage      = 'https://github.com/projectivetech/sidekiq-runner'
 
   s.require_paths = ['lib']
   s.files         = Dir.glob('lib/**/*.rb') + ['lib/sidekiq-runner/sidekiq.god'] + Dir.glob('script/*')
