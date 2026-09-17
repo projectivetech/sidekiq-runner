@@ -3,7 +3,7 @@ module SidekiqRunner
     RUNNER_ATTRIBUTES = [:bundle_env, :chdir, :requirefile]
     RUNNER_ATTRIBUTES.each { |att| attr_accessor att }
 
-    CONFIG_FILE_ATTRIBUTES = [:concurrency, :verbose, :pidfile, :logfile, :tag, :rbtrace, :uid, :gid]
+    CONFIG_FILE_ATTRIBUTES = [:concurrency, :verbose, :logfile, :tag, :rbtrace, :uid, :gid]
     CONFIG_FILE_ATTRIBUTES.each { |att| attr_accessor att }
 
     attr_reader :name, :queues, :config_blocks
@@ -17,7 +17,6 @@ module SidekiqRunner
       @bundle_env   = true
       @chdir        = nil
       @requirefile  = nil
-      @pidfile      = File.join(Dir.pwd, 'tmp', 'pids', "#{@name}.pid")
       @logfile      = File.join(Dir.pwd, 'log', "#{@name}.log")
       @concurrency  = 4
       @verbose      = false
@@ -69,7 +68,6 @@ module SidekiqRunner
       cmd << (rbtrace ? File.expand_path('../../script/sidekiq_rbtrace', __dir__) : 'sidekiq')
       cmd << "-c #{concurrency}"
       cmd << '-v' if verbose
-      cmd << "-P #{pidfile}"
       cmd << "-e #{Rails.env}" if defined?(Rails)
       cmd << "-r #{requirefile}" if requirefile
       cmd << "-g '#{tag}'"
@@ -85,7 +83,6 @@ module SidekiqRunner
 
     def create_directories!
       FileUtils.mkdir_p(File.dirname(logfile))
-      FileUtils.mkdir_p(File.dirname(pidfile))
     end
   end
 end
